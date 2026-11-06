@@ -4,4 +4,4 @@ WORKDIR ./qaic-demo/
 
 COPY ./qaic-demo.py .
 
-ENTRYPOINT ./qaic-demo.py
+CMD ./qaic-demo.py
