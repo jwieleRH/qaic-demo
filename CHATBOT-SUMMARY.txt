@@ -1,0 +1,130 @@
+QAIC Chatbot Demo - Quick Summary
+==================================
+
+Three new files created for chatbot demos on AIC100:
+
+1. qaic-chatbot-simple.py (Recommended First!)
+   - Simple next-token prediction demo
+   - Fixed sequence length (64 tokens)
+   - Shows top 5 predicted next tokens
+   - Good for testing compilation and runtime
+   - Faster to run, easier to debug
+
+2. qaic-chatbot.py (Full Featured)
+   - Autoregressive text generation
+   - Variable sequence length (up to 128 tokens)
+   - Generates complete responses (up to 50 new tokens)
+   - Maintains conversation history
+   - True chatbot behavior
+
+3. qaic-chatbot.sh (Wrapper Script)
+   - Sets up environment (PYTHONPATH)
+   - Run simple: ./qaic-chatbot.sh simple
+   - Run full: ./qaic-chatbot.sh
+
+WORKFLOW (same as qaic-demo.py):
+==================================
+
+┌─────────────────────────────────────────────────┐
+│ 1. Load GPT-2 Model (from HuggingFace)         │
+│    - transformers library                       │
+│    - tokenizer for text encoding               │
+└─────────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────────┐
+│ 2. Export to ONNX                               │
+│    - torch.onnx.export()                        │
+│    - Inputs: input_ids, attention_mask          │
+│    - Output: logits (vocab_size)                │
+└─────────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────────┐
+│ 3. Compile with qaic-exec                       │
+│    - /opt/qti-aic/exec/qaic-exec                │
+│    - Converts ONNX → QPC (programqpc.bin)       │
+│    - Optimized for AIC100 hardware              │
+└─────────────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────────────┐
+│ 4. Run on AIC100                                │
+│    - qaic.Session() from Python SDK             │
+│    - Execute on NSP cores                       │
+│    - Get predictions                            │
+└─────────────────────────────────────────────────┘
+
+KEY DIFFERENCES FROM IMAGE DEMO:
+==================================
+
+qaic-demo.py (Image Classification):
+  Model: ViT (Vision Transformer)
+  Input: Image pixels (3×224×224)
+  Output: Class probabilities
+  Task: Single-shot classification
+
+qaic-chatbot.py (Text Generation):
+  Model: GPT-2 (Language Model)
+  Input: Token IDs (1×128)
+  Output: Next token logits
+  Task: Sequential token generation
+
+QUICK START:
+==================================
+
+1. Install dependencies:
+   pip install transformers torch numpy
+
+2. Run simple version (recommended first):
+   cd ~/src/qaic-demo
+   ./qaic-chatbot.sh simple
+
+3. First run will:
+   - Download GPT-2 (~500MB)
+   - Export to ONNX (~1 minute)
+   - Compile for AIC100 (~2-5 minutes)
+   - Start interactive chatbot
+
+4. Type messages, see predictions!
+
+Example Session (Simple):
+  You: The weather today is
+  Top 5 predicted next tokens:
+    1. ' very' (probability: 0.4532)
+    2. ' quite' (probability: 0.2134)
+    3. ' really' (probability: 0.1234)
+    ...
+
+Example Session (Full):
+  You: What is machine learning?
+  Bot: Machine learning is a subset of artificial
+       intelligence that enables computers to learn
+       from data without being explicitly programmed.
+
+TROUBLESHOOTING:
+==================================
+
+If compilation fails:
+  - Check /dev/accel/accel* exists (AIC100 device)
+  - Verify qaic-exec is at /opt/qti-aic/exec/qaic-exec
+  - Try reducing sequence length in the .py file
+
+If runtime fails:
+  - Export PYTHONPATH=/opt/qti-aic/dev/lib/x86_64:$PYTHONPATH
+  - Check programqpc.bin was created in aic-chatbot-*-binary/
+  - Verify qaic Python module: python3 -c "import qaic; print(qaic.__file__)"
+
+Out of memory:
+  - Use gpt2 (not gpt2-medium/large/xl)
+  - Reduce seq_length (e.g., 64 → 32)
+  - Reduce num_cores (e.g., 4 → 2)
+
+NEXT STEPS:
+==================================
+
+1. Try the simple version first to verify everything works
+2. Experiment with different prompts
+3. Try the full autoregressive version
+4. Modify generation parameters (max_new_tokens, temperature)
+5. Try different GPT-2 variants (gpt2-medium, etc.)
+6. Compare performance: CPU vs AIC100
+
+For detailed documentation, see CHATBOT-README.md
