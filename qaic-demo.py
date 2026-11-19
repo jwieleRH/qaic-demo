@@ -1,6 +1,6 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 
-import os, shutil, sys, requests, torch, numpy, PIL
+import os, shutil, sys, torch, numpy, PIL
 from transformers import ViTForImageClassification, ViTImageProcessor
 import qaic
 
@@ -34,9 +34,8 @@ cmd = f'/opt/qti-aic/exec/qaic-compile -aic-hw -aic-hw-version=2.0 -convert-to-f
 #-aic-num-cores=4 -m=model.onnx -onnx-define-symbol=batch_size,1 -aic-binary-dir=' + aic_binary_dir
 os.system(cmd)
 
-# Get input
-url = 'http://images.cocodataset.org/val2017/000000039769.jpg'
-image = PIL.Image.open(requests.get(url, stream=True).raw)
+# Load the test image
+image = PIL.Image.open('000000039769.jpg')
 
 # Run the model
 # Create the AIC100 session and prepare inputs and outputs
