@@ -26,8 +26,12 @@ aic_binary_dir = 'aic-binary-dir'
 if os.path.exists(aic_binary_dir):
     shutil.rmtree(aic_binary_dir)
 
-cmd = '/opt/qti-aic/exec/qaic-exec -aic-hw -aic-hw-version=2.0 -compile-only -convert-to-fp16 \
--aic-num-cores=4 -m=model.onnx -onnx-define-symbol=batch_size,1 -aic-binary-dir=' + aic_binary_dir
+# TODO: make this configurable 
+num_cores = 4
+
+cmd = f'/opt/qti-aic/exec/qaic-compile -aic-hw -aic-hw-version=2.0 -convert-to-fp16 -aic-num-cores={num_cores}  -m=model.onnx -onnx-define-symbol=batch_size,1 -aic-binary-dir={aic_binary_dir}'
+# cmd = '/opt/qti-aic/exec/qaic-exec -aic-hw -aic-hw-version=2.0 -compile-only -convert-to-fp16 \
+#-aic-num-cores=4 -m=model.onnx -onnx-define-symbol=batch_size,1 -aic-binary-dir=' + aic_binary_dir
 os.system(cmd)
 
 # Get input

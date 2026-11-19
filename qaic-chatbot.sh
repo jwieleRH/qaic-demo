@@ -1,13 +1,30 @@
 #!/bin/bash
 
-# Setup environment for chatbot demo
-export PYTHONPATH=/opt/qti-aic/dev/lib/x86_64:$PYTHONPATH
+# Wrapper script to run chatbot demos using qaic-demo.sh
+# Usage:
+#   ./qaic-chatbot.sh [simple] [--build] [chatbot args...]
+#
+# Examples:
+#   ./qaic-chatbot.sh                              # Run full chatbot
+#   ./qaic-chatbot.sh simple                       # Run simple chatbot
+#   ./qaic-chatbot.sh --build                      # Rebuild and run full chatbot
+#   ./qaic-chatbot.sh --num-cores 8                # Run with 8 cores
+#   ./qaic-chatbot.sh simple --build               # Rebuild and run simple chatbot
 
-# Check if running simple or full version
-if [ "$1" == "simple" ]; then
-    echo "Running simple chatbot demo..."
-    python3 qaic-chatbot-simple.py
-else
-    echo "Running full chatbot demo with autoregressive generation..."
-    python3 qaic-chatbot.py
-fi
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Parse arguments
+CHATBOT_SCRIPT="./qaic-chatbot.py"
+DEMO_ARGS=()
+
+for arg in "$@"; do
+    if [ "$arg" == "simple" ]; then
+        CHATBOT_SCRIPT="./qaic-chatbot-simple.py"
+    else
+        DEMO_ARGS+=("$arg")
+    fi
+done
+
+# Call qaic-demo.sh with the chatbot script and any other arguments
+exec "$SCRIPT_DIR/qaic-demo.sh" "${DEMO_ARGS[@]}" "$CHATBOT_SCRIPT"

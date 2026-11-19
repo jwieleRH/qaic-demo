@@ -1,7 +1,15 @@
-FROM ghcr.io/quic/cloud_ai_inference_ubuntu24:1.20.4.0
+FROM ghcr.io/qualcomm/cloud_ai_inference_ubuntu26:1.23.2.0
 
-WORKDIR ./qaic-demo/
+WORKDIR /qaic-demo
 
-COPY ./qaic-demo.py .
+# Copy demo scripts
+COPY qaic-demo.py .
+COPY qaic-chatbot.py .
+COPY qaic-chatbot-simple.py .
 
-CMD ./qaic-demo.py
+# Copy test image for image classification demo
+COPY 000000039769.jpg .
+
+# Default to image classification demo
+# Use CMD instead of ENTRYPOINT so it can be easily overridden
+CMD ["./qaic-demo.py"]

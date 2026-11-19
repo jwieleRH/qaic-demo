@@ -24,6 +24,9 @@ seq_length = 64
 
 print("Exporting to ONNX...")
 
+# Disable KV caching for simpler ONNX export
+model.config.use_cache = False
+
 # Create dummy input for ONNX export
 dummy_input_ids = torch.randint(0, tokenizer.vocab_size, (1, seq_length))
 dummy_attention_mask = torch.ones((1, seq_length), dtype=torch.long)
@@ -31,7 +34,7 @@ dummy_attention_mask = torch.ones((1, seq_length), dtype=torch.long)
 # Export to ONNX with fixed batch size and sequence length
 torch.onnx.export(
     model,
-    (dummy_input_ids, dummy_attention_mask),
+    (dummy_input_ids, dummy_attention_mask, None),
     'chatbot_simple.onnx',
     export_params=True,
     opset_version=14,
@@ -48,7 +51,7 @@ aic_binary_dir = 'aic-chatbot-simple-binary'
 if os.path.exists(aic_binary_dir):
     shutil.rmtree(aic_binary_dir)
 
-cmd = f'/opt/qti-aic/exec/qaic-exec -aic-hw -aic-hw-version=2.0 -compile-only -convert-to-fp16 \
+cmd = f'/opt/qti-aic/exec/qaic-compile -aic-hw -aic-hw-version=2.0 -convert-to-fp16 \
 -aic-num-cores=4 -m=chatbot_simple.onnx -aic-binary-dir={aic_binary_dir}'
 
 ret = os.system(cmd)
